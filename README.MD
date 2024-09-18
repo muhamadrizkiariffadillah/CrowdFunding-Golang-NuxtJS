@@ -1,6 +1,18 @@
 # CrowdFunding-Golang-NuxtJS
 ## Summary:
-Golang has good performance, as a default golang is secure from RCE upload file, XSS using TEXT/HTML package.
+This project implements Domain-Driven Design (DDD) to organize the code structure, focusing on business logic and scalability.
+- Key Concepts:
+
+    - Domain Layer: Contains the core business logic, including entities like User and services that manage user-related operations.
+    - Application Layer: Handles the interaction between the user and the domain layer, processing requests and orchestrating business rules.
+    - Infrastructure Layer: Manages external services like databases using GORM and PostgreSQL, implementing repositories for data persistence.
+    - Interface Layer: Manages HTTP requests through Gin, providing endpoints and formatting responses for the API.
+
+- Why DDD?
+
+    - Focus on Business Logic: The architecture emphasizes the core domain, making it easier to maintain and evolve as the business grows.
+    - Separation of Concerns: By separating the domain, application, infrastructure, and interface layers, the codebase is more modular and testable.
+    - Scalable Architecture: DDD supports clear boundaries between components, making the system scalable and adaptable to change.
 
 This repository has purposes:
 - Learning how to build website
@@ -8,10 +20,10 @@ This repository has purposes:
 - Learning how to code review and secure our code from malicious attackers.
 
 ### Technologies
-Database: postgresql
-Backend: Golang
-ORM: Gorm
-Auth: JWT
+- Database: postgresql
+- Golang Framework: Gin
+- ORM: Gorm
+- Token Auth: JWT
 
 ## Documentation
 ### Entity Relationship Diagram
@@ -25,5 +37,4 @@ Auth: JWT
 
 <img src="./repo_images/Database Diagram.png">
 
-<script>alert(document.cookie)</script>
 
