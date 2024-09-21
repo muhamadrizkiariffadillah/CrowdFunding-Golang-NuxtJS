@@ -1,8 +1,10 @@
 package users
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	"errors"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Service defines the available methods for user-related operations.
@@ -10,6 +12,9 @@ type Service interface {
 	// RegisterUser registers a new user based on the provided input.
 	// Returns the created user or an error if the process fails.
 	RegisterUser(input RegisterUserInput) (Users, error)
+	// LoginUser is a login endpoint based on the email users
+	// Returns the user or an error email or password do not match
+	LoginUser(input LoginUserInput) (Users, error)
 }
 
 // service implements the Service interface.
@@ -49,4 +54,25 @@ func (s *service) RegisterUser(input RegisterUserInput) (Users, error) {
 		return Users{}, err
 	}
 	return newUser, nil
+}
+
+func (s *service) LoginUser(input LoginUserInput) (Users, error) {
+	userEmail := input.Email
+	userPassword := input.Password
+
+	user, err := s.repo.FindByEmail(userEmail)
+	if err != nil {
+		return Users{}, err
+	}
+
+	if user.Id == 0 {
+		return Users{}, errors.New("the user is not found")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.HashPassword), []byte(userPassword))
+	if err != nil {
+		return Users{}, errors.New("wrong password!")
+	}
+
+	return user, nil
 }

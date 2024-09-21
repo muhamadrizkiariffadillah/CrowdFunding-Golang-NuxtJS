@@ -9,9 +9,9 @@ type UserFormatter struct {
 	Token      string `json:"token"`      // Authentication token (if available).
 }
 
-// RegisterUserFormatter formats the user data along with a token.
+// UserFormatter formats the user data along with a token.
 // Takes a Users struct and a token string, and returns a formatted UserFormatter.
-func RegisterUserFormatter(user Users, token string) UserFormatter {
+func APIUserFormatter(user Users, token string) UserFormatter {
 	formatter := UserFormatter{
 		FullName:   user.FullName,
 		Occupation: user.Occupation,

@@ -33,8 +33,12 @@ func main() {
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
-	// Create endpoint for user registration
-	api.POST("/users", userHandler.Signup)
+	//  Endpoint for user registration
+	api.POST("/users/signup", userHandler.Signup)
+	// Endpoint for user logged in
+	api.POST("/users/login", userHandler.Login)
+	// Endpoint for fetching the user.
+	api.GET("/users/me", userHandler.FetchUser)
 
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,

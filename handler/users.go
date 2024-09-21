@@ -30,7 +30,7 @@ func UserHandler(userService users.Service) *userHandler {
 // @Success 201 {object} helper.Response "Your account has been created"
 // @Failure 422 {object} helper.Response "Validation errors"
 // @Failure 500 {object} helper.Response "Server error"
-// @Router /users [post]
+// @Router /api/v1/users/signup [post]
 func (h *userHandler) Signup(c *gin.Context) {
 	var input users.RegisterUserInput
 
@@ -57,7 +57,66 @@ func (h *userHandler) Signup(c *gin.Context) {
 	}
 
 	// Format the new user data and return success response.
-	formatter := users.RegisterUserFormatter(newUser, "")
+	formatter := users.APIUserFormatter(newUser, "")
 	response := helper.APIResponse(http.StatusCreated, "Success", "Your account has been created", formatter)
 	c.JSON(http.StatusCreated, response)
+}
+
+// Login handles user login.
+// It validates the input credentials and logs in the user if successful.
+// @Summary Login a user
+// @Description This endpoint allows an existing user to log in.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param request body users.LoginUserInput true "User login data"
+// @Success 200 {object} helper.Response "Successfully logged in"
+// @Failure 422 {object} helper.Response "Validation errors"
+// @Failure 500 {object} helper.Response "Server error"
+// @Router /api/v1/users/login [post]
+func (h *userHandler) Login(c *gin.Context) {
+	var input users.LoginUserInput
+
+	// Bind incoming JSON request to input struct and validate it.
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{
+			"Errors:": errors,
+		}
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "Failed", "errors", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	// Log in the user through the service layer.
+	loggedUser, err := h.userService.LoginUser(input)
+	if err != nil {
+		errorMessage := gin.H{
+			"Errors:": err.Error(),
+		}
+		response := helper.APIResponse(http.StatusInternalServerError, "Failed", "errors", errorMessage)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	// Format the logged-in user data and return success response.
+	formatter := users.APIUserFormatter(loggedUser, "")
+	response := helper.APIResponse(http.StatusOK, "Success", "Successfully logged in", formatter)
+	c.JSON(http.StatusOK, response)
+}
+
+// FetchUser retrieves the currently authenticated user's data.
+// @Summary Get current user data
+// @Description This endpoint fetches the data of the currently logged-in user.
+// @Tags Users
+// @Produce json
+// @Success 200 {object} helper.Response "Successfully fetch user data"
+// @Failure 401 {object} helper.Response "Unauthorized"
+// @Router /api/v1/users/me [get]
+func (h *userHandler) FetchUser(c *gin.Context) {
+	currentUser := c.MustGet("currentUser").(users.Users)
+	formatter := users.APIUserFormatter(currentUser, "")
+	response := helper.APIResponse(http.StatusOK, "Success", "Successfully fetch user data", formatter)
+	c.JSON(http.StatusOK, response)
 }

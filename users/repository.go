@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 // Repository defines method for users
 type Repository interface {
 	Save(user Users) (Users, error)
+	FindByEmail(email string) (Users, error)
 }
 
 // repository implements the Repository interface
@@ -21,6 +22,16 @@ func UserRepository(db *gorm.DB) *repository {
 // Return the saved user or error
 func (r *repository) Save(user Users) (Users, error) {
 	err := r.db.Create(&user).Error
+	if err != nil {
+		return Users{}, err
+	}
+	return user, nil
+}
+
+func (r *repository) FindByEmail(email string) (Users, error) {
+	var user Users
+
+	err := r.db.Find("email = ?", email).Error
 	if err != nil {
 		return Users{}, err
 	}
