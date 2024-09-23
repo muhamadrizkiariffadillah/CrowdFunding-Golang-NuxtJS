@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/authJWT"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -20,14 +21,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error()) // Log and terminate if the database connection fails
 	}
-
+	authService := authJWT.NewJwtService()
 	// Initialize repositories, services, and handlers for user-related operations
 	// Repository layer to interact with database
 	userRepository := users.UserRepository(db)
 	// Service layer for business logic
 	userService := users.UserServices(userRepository)
 	// Handler for user-related HTTP requests
-	userHandler := handler.UserHandler(userService)
+	userHandler := handler.UserHandler(userService, authService)
 
 	// Setup Gin router and API route groups
 	router := gin.Default()
@@ -39,6 +40,10 @@ func main() {
 	api.POST("/users/login", userHandler.Login)
 	// Endpoint for fetching the user.
 	api.GET("/users/me", userHandler.FetchUser)
+	// Endpoint for checking email user is available.
+	api.POST("/users/check-email", userHandler.CheckEmail)
+	// Endpoint for uploading user avatar
+	api.PUT("/users/me/upload-avatar", userHandler.UploadAvatar)
 
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,

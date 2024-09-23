@@ -13,3 +13,12 @@ type LoginUserInput struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
+
+type CheckEmailInput struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+type UploadAvatarInput struct {
+	Id                 int    `json:"id" binding:"required"`
+	AvatarFileLocation string `json:"avatar_file_location" binding:"required"`
+}

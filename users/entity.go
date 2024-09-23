@@ -4,7 +4,7 @@ import "time"
 
 // Users entity for database
 type Users struct {
-	Id             uint
+	Id             int
 	FullName       string
 	Occupation     string
 	AvatarFileName string

@@ -15,6 +15,10 @@ type Service interface {
 	// LoginUser is a login endpoint based on the email users
 	// Returns the user or an error email or password do not match
 	LoginUser(input LoginUserInput) (Users, error)
+
+	IsEmailAvailable(input CheckEmailInput) (bool, error)
+
+	UploadAvatar(Id int, fileLocation string) (Users, error)
 }
 
 // service implements the Service interface.
@@ -56,6 +60,8 @@ func (s *service) RegisterUser(input RegisterUserInput) (Users, error) {
 	return newUser, nil
 }
 
+// LoginUser handles user login
+// it finds a user by email and returns user or error
 func (s *service) LoginUser(input LoginUserInput) (Users, error) {
 	userEmail := input.Email
 	userPassword := input.Password
@@ -71,8 +77,40 @@ func (s *service) LoginUser(input LoginUserInput) (Users, error) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.HashPassword), []byte(userPassword))
 	if err != nil {
-		return Users{}, errors.New("wrong password!")
+		return Users{}, errors.New("wrong password")
 	}
 
 	return user, nil
+}
+
+// IsEmailAvailable handles check user email
+// return true or false
+func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
+	email := input.Email
+
+	user, err := s.repo.FindByEmail(email)
+
+	if err != nil || user.Id != 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (s *service) UploadAvatar(Id int, fileLocation string) (Users, error) {
+	user, err := s.repo.FindById(Id)
+
+	if err != nil {
+		return Users{}, err
+	}
+
+	user.AvatarFileName = fileLocation
+
+	updatedUser, err := s.repo.Save(user)
+
+	if err != nil {
+		return Users{}, err
+	}
+
+	return updatedUser, nil
 }
