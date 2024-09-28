@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/authJWT"
 	"log"
+
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/authJWT"
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/middleware"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/docs"
@@ -29,6 +31,8 @@ func main() {
 	userService := users.UserServices(userRepository)
 	// Handler for user-related HTTP requests
 	userHandler := handler.UserHandler(userService, authService)
+	// 
+	middleware := middleware.MiddleWare(authService,userService)
 
 	// Setup Gin router and API route groups
 	router := gin.Default()
@@ -43,7 +47,7 @@ func main() {
 	// Endpoint for checking email user is available.
 	api.POST("/users/check-email", userHandler.CheckEmail)
 	// Endpoint for uploading user avatar
-	api.PUT("/users/me/upload-avatar", userHandler.UploadAvatar)
+	api.PUT("/users/me/upload-avatar",middleware, userHandler.UploadAvatar)
 
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,

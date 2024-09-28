@@ -19,6 +19,9 @@ type Service interface {
 	IsEmailAvailable(input CheckEmailInput) (bool, error)
 
 	UploadAvatar(Id int, fileLocation string) (Users, error)
+
+	GetUserByID(userId int) (Users, error)
+
 }
 
 // service implements the Service interface.
@@ -113,4 +116,21 @@ func (s *service) UploadAvatar(Id int, fileLocation string) (Users, error) {
 	}
 
 	return updatedUser, nil
+}
+
+func (s *service) GetUserByID(userId int)(Users,error)  {
+
+	user, err := s.repo.FindById(userId)
+
+	if err != nil {
+
+		return Users{}, err
+
+	}
+
+	if user.Id == 0{
+		return Users{},errors.New("user not found")
+	}
+
+	return user,nil
 }

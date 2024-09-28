@@ -1,13 +1,14 @@
 package handler
 
 import (
-	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/authJWT"
 	"image"
 	"image/jpeg"
 	"image/png"
 	"mime/multipart"
 	"net/http"
 	"os"
+
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/authJWT"
 
 	"github.com/gin-gonic/gin"
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/helper"
@@ -151,7 +152,7 @@ func (h *userHandler) FetchUser(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} helper.Response "email is available"
 // @Failure 401 {object} helper.Response "email has been registered"
-// @Router /api/v1/users/check-email [get]
+// @Router /api/v1/users/check-email [POST]
 func (h *userHandler) CheckEmail(c *gin.Context) {
 	var input users.CheckEmailInput
 
@@ -194,6 +195,16 @@ func (h *userHandler) CheckEmail(c *gin.Context) {
 
 }
 
+// UploadAvatar
+// @Summary Upload Avatar user endpoint
+// @Description this endpoint is used to upload avatar users
+// @Tags Users
+// @Produce json
+// @Success 200 {object} helper.Response "email is available"
+// @Failure 401 {object} helper.Response "email has been registered"
+// @Failure 500 {object} helper.Response ""
+// @Router /api/v1/users/check-email [POST]
+// TODO: Need to refactor this handler after finish this course.
 func (h *userHandler) UploadAvatar(c *gin.Context) {
 
 	const maxFileSize = 2 << 20
@@ -325,17 +336,20 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 		}
 		response := helper.APIResponse(http.StatusInternalServerError, "Failed", "Failed to save avatar", data)
 		c.JSON(http.StatusInternalServerError, response)
+		return
 	}
 
-	dummyUserId := 1
+	currentUser := c.MustGet("currentUser").(users.Users)
+	userId := currentUser.Id
 
-	_, err = h.userService.UploadAvatar(dummyUserId, path)
+	_, err = h.userService.UploadAvatar(userId, path)
 	if err != nil {
 		data := gin.H{
 			"is_uploaded": false,
 		}
 		response := helper.APIResponse(http.StatusInternalServerError, "Failed", "Failed to save avatar", data)
 		c.JSON(http.StatusInternalServerError, response)
+		return
 	}
 	data := gin.H{
 		"is_uploaded":   true,
@@ -343,4 +357,5 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	}
 	response := helper.APIResponse(http.StatusOK, "Success", "successfully upload the avatar", data)
 	c.JSON(http.StatusOK, response)
+	return
 }
