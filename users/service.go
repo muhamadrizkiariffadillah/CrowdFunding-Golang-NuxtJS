@@ -21,7 +21,6 @@ type Service interface {
 	UploadAvatar(Id int, fileLocation string) (Users, error)
 
 	GetUserByID(userId int) (Users, error)
-
 }
 
 // service implements the Service interface.
@@ -109,7 +108,7 @@ func (s *service) UploadAvatar(Id int, fileLocation string) (Users, error) {
 
 	user.AvatarFileName = fileLocation
 
-	updatedUser, err := s.repo.Save(user)
+	updatedUser, err := s.repo.Update(user)
 
 	if err != nil {
 		return Users{}, err
@@ -118,7 +117,7 @@ func (s *service) UploadAvatar(Id int, fileLocation string) (Users, error) {
 	return updatedUser, nil
 }
 
-func (s *service) GetUserByID(userId int)(Users,error)  {
+func (s *service) GetUserByID(userId int) (Users, error) {
 
 	user, err := s.repo.FindById(userId)
 
@@ -128,9 +127,9 @@ func (s *service) GetUserByID(userId int)(Users,error)  {
 
 	}
 
-	if user.Id == 0{
-		return Users{},errors.New("user not found")
+	if user.Id == 0 {
+		return Users{}, errors.New("user not found")
 	}
 
-	return user,nil
+	return user, nil
 }

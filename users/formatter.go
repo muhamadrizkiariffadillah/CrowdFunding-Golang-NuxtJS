@@ -6,7 +6,7 @@ type UserFormatter struct {
 	Occupation string `json:"occupation"` // User's occupation.
 	Email      string `json:"email"`      // User's email address.
 	Password   string `json:"password"`   // User's hashed password.
-	Token      string `json:"token"`      // Authentication token (if available).
+	Token      string `json:"token"`
 }
 
 // UserFormatter formats the user data along with a token.
@@ -17,7 +17,7 @@ func APIUserFormatter(user Users, token string) UserFormatter {
 		Occupation: user.Occupation,
 		Email:      user.Email,
 		Password:   user.HashPassword, // Return the hashed password.
-		Token:      token,             // Attach the token, if provided.
+		Token:      token,
 	}
 	return formatter
 }

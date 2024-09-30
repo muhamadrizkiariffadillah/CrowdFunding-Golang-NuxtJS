@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/authJWT"
-	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/middleware"
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/campaign"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/docs"
@@ -18,7 +18,7 @@ import (
 
 func main() {
 	// Setup database connection using GORM with PostgreSQL
-	dsn := "host=127.0.0.1 user=postgres password=testing_password dbname=crowdfunding port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := "host=127.0.0.1 user=postgres password=123qweasdzxc dbname=crowdfunding port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err.Error()) // Log and terminate if the database connection fails
@@ -31,13 +31,21 @@ func main() {
 	userService := users.UserServices(userRepository)
 	// Handler for user-related HTTP requests
 	userHandler := handler.UserHandler(userService, authService)
-	// 
-	middleware := middleware.MiddleWare(authService,userService)
+	//
+	middleware := authJWT.MiddleWare(authService, userService)
+
+	// Campaign
+	campaignRepository := campaign.CampaignRepository(db)
+	// Service layer for business logic
+	campaignServices := campaign.CampaignServices(campaignRepository)
+	// Handler for compaign-related HTTP requests.
+	campaignHandler := handler.CampaignHandler(campaignServices)
 
 	// Setup Gin router and API route groups
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
+	// user url
 	//  Endpoint for user registration
 	api.POST("/users/signup", userHandler.Signup)
 	// Endpoint for user logged in
@@ -47,7 +55,10 @@ func main() {
 	// Endpoint for checking email user is available.
 	api.POST("/users/check-email", userHandler.CheckEmail)
 	// Endpoint for uploading user avatar
-	api.PUT("/users/me/upload-avatar",middleware, userHandler.UploadAvatar)
+	api.POST("/users/me/upload-avatar", middleware, userHandler.UploadAvatar)
+
+	// campaign url
+	api.POST("/campaign/create", campaignHandler.SaveCampaign)
 
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,

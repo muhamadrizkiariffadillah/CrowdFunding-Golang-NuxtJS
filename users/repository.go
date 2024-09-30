@@ -46,15 +46,16 @@ func (r *repository) FindByEmail(email string) (Users, error) {
 // return user or error
 func (r *repository) FindById(id int) (Users, error) {
 	var user Users
-	err := r.db.Where("id = ?").Find(&user).Error
+	err := r.db.Where("Id= ?", id).Find(&user).Error
 	if err != nil {
-		return Users{}, err
+		return user, err
 	}
 	return user, nil
+
 }
 
 func (r *repository) Update(user Users) (Users, error) {
-	err := r.db.Save(&user).Error
+	err := r.db.Model(&user).Update("avatar_file_name", user.AvatarFileName).Error
 	if err != nil {
 		return Users{}, err
 	}
