@@ -1,42 +1,28 @@
 package campaign
 
-import (
-	"fmt"
-	"time"
-
-	"github.com/gosimple/slug"
-)
-
 type Service interface {
-	CreateCampaign(input CreateCampaignInput) (Campaigns, error)
+	GetCampaigns(userId int) ([]Campaigns, error)
 }
 
-type campaignServices struct {
+type services struct {
 	r Repository
 }
 
-func CampaignServices(r Repository) *campaignServices {
-	return &campaignServices{r}
+func CampaignServices(r Repository) *services {
+	return &services{r}
 }
 
-func (s *campaignServices) CreateCampaign(input CreateCampaignInput) (Campaigns, error) {
-	campaign := Campaigns{
-		UserId:           input.User.Id,
-		CampaignName:     input.CampaignName,
-		ShortDescription: input.ShortDescription,
-		Description:      input.Description,
-		GoalAmount:       input.GoalAmount,
-		CurrentAmount:    0,
-		Perks:            input.Perks,
-		BackerCount:      0,
-		UpdatedAt:        time.Now(),
-		CreatedAt:        time.Now(),
+func (s *services) GetCampaigns(userId int) ([]Campaigns, error) {
+	if userId != 0 {
+		campaigns, err := s.r.FindByUserId(userId)
+		if err != nil {
+			return []Campaigns{}, err
+		}
+		return campaigns, nil
 	}
-	slugCandidate := fmt.Sprintf("%v %v", input.User.Id, input.CampaignName)
-	campaign.Slug = slug.Make(slugCandidate)
-	newCampaign, err := s.r.Save(campaign)
+	campaigns, err := s.r.FindAll()
 	if err != nil {
-		return Campaigns{}, err
+		return []Campaigns{}, err
 	}
-	return newCampaign, nil
+	return campaigns, nil
 }

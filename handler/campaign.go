@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/campaign"
@@ -16,23 +17,20 @@ func CampaignHandler(service campaign.Service) *campaignHandler {
 	return &campaignHandler{service: service}
 }
 
-func (h *campaignHandler) SaveCampaign(c *gin.Context) {
-	// currentUser := c.MustGet("currentUser").(users.Users)
+func (h *campaignHandler) GetCampaigns(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Query("user_id"))
 
-	var input campaign.CreateCampaignInput
-
-	err := c.ShouldBindJSON(&input)
+	campaigns, err := h.service.GetCampaigns(userId)
 	if err != nil {
-		errors := helper.FormatValidationError(err)
-		message := gin.H{
-			"error": errors,
+		errMsg := gin.H{
+			"error": err,
 		}
-		response := helper.APIResponse(http.StatusUnprocessableEntity, "failed", "create campaign fail", message)
-		c.JSON(http.StatusUnsupportedMediaType, response)
+		response := helper.APIResponse(http.StatusInternalServerError, "failed", "fail to load campaigns", errMsg)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, response)
 		return
 	}
 
-	response := helper.APIResponse(http.StatusOK, "success", "succesfully to create campaign", nil)
+	response := helper.APIResponse(http.StatusOK, "success", "success to load campaign", campaigns)
 	c.JSON(http.StatusOK, response)
 	return
 }
