@@ -1,4 +1,4 @@
-package campaign
+package campaigns
 
 type Service interface {
 	GetCampaigns(userId int) ([]Campaigns, error)

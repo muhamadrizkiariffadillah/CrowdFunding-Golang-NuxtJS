@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/authJWT"
-	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/campaign"
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/campaigns"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/docs"
@@ -35,14 +35,16 @@ func main() {
 	middleware := authJWT.MiddleWare(authService, userService)
 
 	// Campaign
-	campaignRepository := campaign.CampaignRepository(db)
+	campaignRepository := campaigns.CampaignRepository(db)
 	// Service layer for business logic
-	campaignServices := campaign.CampaignServices(campaignRepository)
+	campaignServices := campaigns.CampaignServices(campaignRepository)
 	// Handler for compaign-related HTTP requests.
 	campaignHandler := handler.CampaignHandler(campaignServices)
 
 	// Setup Gin router and API route groups
 	router := gin.Default()
+	// Static router
+	router.Static("/images", "./images")
 	api := router.Group("/api/v1")
 
 	// user url
@@ -58,7 +60,7 @@ func main() {
 	api.POST("/users/me/upload-avatar", middleware, userHandler.UploadAvatar)
 
 	// campaign url
-	api.POST("/campaign/create", campaignHandler.SaveCampaign)
+	api.GET("/campaigns", campaignHandler.GetCampaigns)
 
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,

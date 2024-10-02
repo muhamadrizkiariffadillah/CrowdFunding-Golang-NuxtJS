@@ -1,4 +1,4 @@
-package campaign
+package campaigns
 
 import "github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/users"
 

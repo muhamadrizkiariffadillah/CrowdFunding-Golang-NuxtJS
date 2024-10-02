@@ -5,22 +5,22 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/campaign"
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/campaigns"
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/helper"
 )
 
 type campaignHandler struct {
-	service campaign.Service
+	service campaigns.Service
 }
 
-func CampaignHandler(service campaign.Service) *campaignHandler {
+func CampaignHandler(service campaigns.Service) *campaignHandler {
 	return &campaignHandler{service: service}
 }
 
 func (h *campaignHandler) GetCampaigns(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Query("user_id"))
 
-	campaigns, err := h.service.GetCampaigns(userId)
+	campaign, err := h.service.GetCampaigns(userId)
 	if err != nil {
 		errMsg := gin.H{
 			"error": err,
@@ -30,7 +30,8 @@ func (h *campaignHandler) GetCampaigns(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse(http.StatusOK, "success", "success to load campaign", campaigns)
+	formatter := campaigns.CampaignsFormatter(campaign)
+	response := helper.APIResponse(http.StatusOK, "success", "success to load campaign", formatter)
 	c.JSON(http.StatusOK, response)
 	return
 }
