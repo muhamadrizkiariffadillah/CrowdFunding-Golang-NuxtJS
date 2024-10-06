@@ -43,8 +43,8 @@ func main() {
 
 	// Setup Gin router and API route groups
 	router := gin.Default()
-	// Static router
-	router.Static("/images", "./images")
+	// Static router avatar
+	router.Static("/images/user/avatar", "./images")
 	api := router.Group("/api/v1")
 
 	// user url
@@ -61,6 +61,7 @@ func main() {
 
 	// campaign url
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
+	api.GET("/campaign/:id", campaignHandler.GetCampaign)
 
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
