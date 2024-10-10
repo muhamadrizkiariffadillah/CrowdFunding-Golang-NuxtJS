@@ -62,7 +62,7 @@ func main() {
 	// campaign url
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
 	api.GET("/campaign/:id", campaignHandler.GetCampaign)
-
+	api.POST(("/campaign/create"), middleware, campaignHandler.CreateCampaign)
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
 		ginSwagger.URL("http://127.0.0.1:8888/swagger/doc.json"),
