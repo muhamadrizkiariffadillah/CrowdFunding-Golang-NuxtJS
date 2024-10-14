@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -93,7 +94,7 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 	if err != nil {
 		formatter := helper.FormatValidationError(err)
 		errorMsg := gin.H{"error": formatter}
-		response := helper.APIResponse(http.StatusUnprocessableEntity, "failed", "failed to get campaign by id", errorMsg)
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "failed", "failed to update the campaign", errorMsg)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
@@ -104,7 +105,7 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 	campaign, err := h.service.GetCampaignById(campaignId)
 	if err != nil {
 		errorMsg := gin.H{"error": err}
-		response := helper.APIResponse(http.StatusInternalServerError, "failed", "failed to update the campaign", errorMsg)
+		response := helper.APIResponse(http.StatusInternalServerError, "failed", "failed to get campaign", errorMsg)
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
@@ -127,4 +128,57 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 	formatter := campaigns.CampaignFormatter(updateCampaign)
 	responseMsg := helper.APIResponse(http.StatusOK, "success", "successfully update campaign", formatter)
 	c.JSON(http.StatusOK, responseMsg)
+}
+
+func (h *campaignHandler) SaveCampaignImage(c *gin.Context) {
+	var input campaigns.CreateCampaignImageInput
+	err := c.ShouldBind(&input)
+	if err != nil {
+		formatter := helper.FormatValidationError(err)
+		errorMsg := gin.H{"error": formatter}
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "failed", "failed to save campaign images", errorMsg)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		errorMsg := gin.H{"is_uploaded": false}
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "failed", "failed to upload the image", errorMsg)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(users.Users)
+	userId := currentUser.Id
+
+	path := fmt.Sprintf("images/campaigns_images/%d-%s", userId, file.Filename)
+
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		errorMsg := gin.H{"is_uploaded": false, "error": err}
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "failed", "failed to get campaign by id", errorMsg)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	campaign, err := h.service.GetCampaignById(input.CampaignId)
+	if userId != campaign.User.Id {
+		errorMsg := gin.H{"is_uploaded": false, "error": err}
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "failed", "unauthorized action", errorMsg)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	_, err = h.service.SaveCampaignImage(input, path)
+	if err != nil {
+		errorMsg := gin.H{"is_uploaded": false, "error": err}
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "failed", "failed to get campaign by id", errorMsg)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	responseMsg := gin.H{"is_uploaded": true}
+	response := helper.APIResponse(http.StatusOK, "Success", "Successfully upload campaign image", responseMsg)
+	c.JSON(http.StatusOK, response)
 }

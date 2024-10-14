@@ -65,6 +65,10 @@ func main() {
 	api.POST(("/campaign/create"), middleware, campaignHandler.CreateCampaign)
 	api.POST("/campaign/update", middleware, campaignHandler.UpdateCampaign)
 
+	// campaign images
+	api.POST("campaign/image", middleware, campaignHandler.SaveCampaignImage)
+	
+
 	// test
 
 	// Swagger API docs route

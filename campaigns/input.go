@@ -14,3 +14,8 @@ type CreateCampaignInput struct {
 	Perks            string `json:"perks" binding:"required"`
 	User             users.Users
 }
+
+type CreateCampaignImageInput struct {
+	CampaignId int  `form:"campaign_id" binding:"required"`
+	IsPrimary  bool `form:"is_primary" binding:"required"`
+}
