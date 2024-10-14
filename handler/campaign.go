@@ -38,23 +38,15 @@ func (h *campaignHandler) GetCampaigns(c *gin.Context) {
 }
 
 func (h *campaignHandler) GetCampaign(c *gin.Context) {
-	var input campaigns.GetCampaignDetailInput
+	campaignId, _ := strconv.Atoi(c.Query("id"))
 
-	err := c.ShouldBindQuery(&input)
-	if err != nil {
-		response := helper.APIResponse(http.StatusNotFound, "failed", "fail to parser the request", err)
-		c.JSON(http.StatusNotFound, response)
-		return
-	}
-
-	campaign, err := h.service.GetCampaignById(input)
+	campaign, err := h.service.GetCampaignById(campaignId)
 	if err != nil {
 		response := helper.APIResponse(http.StatusInternalServerError, "failed", "fail to get campaign detail", err)
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
-	// formatter
 	formatter := campaigns.GetCampaignDetailFormatter(campaign)
 	response := helper.APIResponse(http.StatusOK, "success", "successfully to get campaign detail", formatter)
 	c.JSON(http.StatusOK, response)
@@ -80,7 +72,7 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 	newCampaign, err := h.service.CreateCampaign(input)
 	if err != nil {
 		errorMessage := gin.H{"error": err}
-		response := helper.APIResponse(http.StatusInternalServerError, "failed", "fail to get entity", errorMessage)
+		response := helper.APIResponse(http.StatusInternalServerError, "failed", "fail to create a campaign", errorMessage)
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
@@ -89,4 +81,50 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 	response := helper.APIResponse(http.StatusCreated, "success", "successfully to create a campaign", formatter)
 	c.JSON(http.StatusCreated, response)
 	return
+}
+
+func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
+	// url: http://server/api/v1/campaign/update?id=
+	campaignId, _ := strconv.Atoi(c.Query("id"))
+
+	// body request JSON
+	var inputData campaigns.CreateCampaignInput
+	err := c.ShouldBindJSON(&inputData)
+	if err != nil {
+		formatter := helper.FormatValidationError(err)
+		errorMsg := gin.H{"error": formatter}
+		response := helper.APIResponse(http.StatusUnprocessableEntity, "failed", "failed to get campaign by id", errorMsg)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(users.Users)
+	inputData.User = currentUser
+
+	campaign, err := h.service.GetCampaignById(campaignId)
+	if err != nil {
+		errorMsg := gin.H{"error": err}
+		response := helper.APIResponse(http.StatusInternalServerError, "failed", "failed to update the campaign", errorMsg)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	// Security Layer for IDOR.
+	if campaign.User.Id != currentUser.Id {
+		response := helper.APIResponse(http.StatusUnauthorized, "failed", "Unathorized action", nil)
+		c.JSON(http.StatusUnauthorized, response)
+		return
+	}
+
+	updateCampaign, err := h.service.UpdateCampaign(campaignId, inputData)
+	if err != nil {
+		formatter := helper.FormatValidationError(err)
+		errorMsg := gin.H{"error": formatter}
+		response := helper.APIResponse(http.StatusInternalServerError, "failed", "failed to update the campaign", errorMsg)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	//
+	formatter := campaigns.CampaignFormatter(updateCampaign)
+	responseMsg := helper.APIResponse(http.StatusOK, "success", "successfully update campaign", formatter)
+	c.JSON(http.StatusOK, responseMsg)
 }

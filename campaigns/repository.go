@@ -30,7 +30,7 @@ func (r *repository) FindAll() ([]Campaigns, error) {
 func (r *repository) FindByUserId(userId int) ([]Campaigns, error) {
 	var campaigns []Campaigns
 
-	err := r.db.Where("user_id = ?", userId).Preload("CampaignImages", "campaign_images.is_primary = true").Find(&campaigns).Error
+	err := r.db.Where("user_id = ?", userId).Preload("CampaignImage", "campaign_images.is_primary = true").Find(&campaigns).Error
 
 	if err != nil {
 		return []Campaigns{}, err
@@ -40,7 +40,7 @@ func (r *repository) FindByUserId(userId int) ([]Campaigns, error) {
 }
 func (r *repository) FindById(campaignId int) (Campaigns, error) {
 	var campaign Campaigns
-	err := r.db.Preload("User").Preload("CampaignImages").Where("id = ?", campaignId).Find(&campaign).Error
+	err := r.db.Where("id = ?", &campaignId).Preload("User").Preload("CampaignImage").Find(&campaign).Error
 	if err != nil {
 		return Campaigns{}, err
 	}
@@ -54,6 +54,7 @@ func (r *repository) Save(campaign Campaigns) (Campaigns, error) {
 	}
 	return campaign, nil
 }
+
 func (r *repository) Update(campaign Campaigns) (Campaigns, error) {
 	err := r.db.Save(&campaign).Error
 	if err != nil {
