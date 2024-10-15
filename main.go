@@ -5,6 +5,7 @@ import (
 
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/authJWT"
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/campaigns"
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/transaction"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/docs"
@@ -41,6 +42,11 @@ func main() {
 	// Handler for compaign-related HTTP requests.
 	campaignHandler := handler.CampaignHandler(campaignServices)
 
+	// transaction
+	transactionRepository := transaction.TransactionsRepository(db)
+	transactionServices := transaction.TransactionsServices(transactionRepository)
+	transactionHandler := handler.TransactionsHandler(transactionServices)
+
 	// Setup Gin router and API route groups
 	router := gin.Default()
 	// Static router avatar
@@ -67,10 +73,9 @@ func main() {
 
 	// campaign images
 	api.POST("campaign/image", middleware, campaignHandler.SaveCampaignImage)
-	
 
-	// test
-
+	// transaction api
+	api.GET("/campaign/transaction", transactionHandler.GetCampaignTransactions)
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
 		ginSwagger.URL("http://127.0.0.1:8888/swagger/doc.json"),
