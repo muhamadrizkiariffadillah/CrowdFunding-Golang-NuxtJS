@@ -22,19 +22,6 @@ func UserHandler(userService users.Service, authService authJWT.Service) *userHa
 	return &userHandler{userService, authService}
 }
 
-// Signup handles the user registration process.
-// It validates the input, registers the user using the service layer,
-// and returns the appropriate API response.
-// @Summary Register a new user
-// @Description This endpoint allows you to register a new user.
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param request body users.RegisterUserInput true "User registration data"
-// @Success 201 {object} helper.Response "Your account has been created"
-// @Failure 422 {object} helper.Response "Validation errors"
-// @Failure 500 {object} helper.Response "Server error"
-// @Router /api/v1/users/signup [post]
 func (h *userHandler) Signup(c *gin.Context) {
 	var input users.RegisterUserInput
 
@@ -65,18 +52,6 @@ func (h *userHandler) Signup(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
-// Login handles user login.
-// It validates the input credentials and logs in the user if successful.
-// @Summary Login a user
-// @Description This endpoint allows an existing user to log in.
-// @Tags Users
-// @Accept json
-// @Produce json
-// @Param request body users.LoginUserInput true "User login data"
-// @Success 200 {object} helper.Response "Successfully logged in"
-// @Failure 422 {object} helper.Response "Validation errors"
-// @Failure 500 {object} helper.Response "Server error"
-// @Router /api/v1/users/login [post]
 func (h *userHandler) Login(c *gin.Context) {
 	var input users.LoginUserInput
 
@@ -119,14 +94,6 @@ func (h *userHandler) Login(c *gin.Context) {
 	return
 }
 
-// FetchUser retrieves the currently authenticated user's data.
-// @Summary Get current user data
-// @Description This endpoint fetches the data of the currently logged-in user.
-// @Tags Users
-// @Produce json
-// @Success 200 {object} helper.Response "Successfully fetch user data"
-// @Failure 401 {object} helper.Response "Unauthorized"
-// @Router /api/v1/users/me [get]
 func (h *userHandler) FetchUser(c *gin.Context) {
 	currentUser := c.MustGet("currentUser").(users.Users)
 	formatter := users.APIUserFormatter(currentUser, "")
@@ -134,14 +101,6 @@ func (h *userHandler) FetchUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// CheckEmail
-// @Summary Check email availability
-// @Description This endpoint check email when the new user signup
-// @Tags Users
-// @Produce json
-// @Success 200 {object} helper.Response "email is available"
-// @Failure 401 {object} helper.Response "email has been registered"
-// @Router /api/v1/users/check-email [POST]
 func (h *userHandler) CheckEmail(c *gin.Context) {
 	var input users.CheckEmailInput
 
@@ -184,15 +143,6 @@ func (h *userHandler) CheckEmail(c *gin.Context) {
 
 }
 
-// UploadAvatar
-// @Summary Upload Avatar user endpoint
-// @Description this endpoint is used to upload avatar users
-// @Tags Users
-// @Produce json
-// @Success 200 {object} helper.Response "email is available"
-// @Failure 401 {object} helper.Response "email has been registered"
-// @Failure 500 {object} helper.Response ""
-// @Router /api/v1/users/check-email [POST]
 // TODO: Need to refactor this handler after finish this course.
 func (h *userHandler) UploadAvatar(c *gin.Context) {
 

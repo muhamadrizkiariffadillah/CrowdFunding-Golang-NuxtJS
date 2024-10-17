@@ -51,6 +51,7 @@ func main() {
 	router := gin.Default()
 	// Static router avatar
 	router.Static("/images/user/avatar", "./images")
+	
 	api := router.Group("/api/v1")
 
 	// user url
@@ -75,7 +76,9 @@ func main() {
 	api.POST("campaign/image", middleware, campaignHandler.SaveCampaignImage)
 
 	// transaction api
-	api.GET("/campaign/transaction", transactionHandler.GetCampaignTransactions)
+	api.GET("/campaign/transactions", transactionHandler.GetCampaignTransactions)
+	api.GET("/user/transactions", middleware, transactionHandler.GetUserTransactions)
+
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
 		ginSwagger.URL("http://127.0.0.1:8888/swagger/doc.json"),

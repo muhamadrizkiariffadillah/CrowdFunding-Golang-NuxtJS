@@ -3,6 +3,7 @@ package transaction
 import (
 	"time"
 
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/campaigns"
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/users"
 )
 
@@ -16,4 +17,5 @@ type Transactions struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	User       users.Users
+	Campaign   campaigns.Campaigns
 }
