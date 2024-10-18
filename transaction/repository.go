@@ -1,10 +1,14 @@
 package transaction
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	GetByCampaignId(campaignId int) ([]Transactions, error)
 	GetByUserId(userId int) ([]Transactions, error)
+	Save(transaction Transactions) (Transactions, error)
+	Update(transaction Transactions) (Transactions, error)
 }
 
 type repository struct {
@@ -32,4 +36,19 @@ func (r *repository) GetByUserId(userId int) ([]Transactions, error) {
 		return []Transactions{}, err
 	}
 	return transactions, nil
+}
+func (r *repository) Save(transaction Transactions) (Transactions, error) {
+	err := r.db.Create(&transaction).Error
+	if err != nil {
+		return Transactions{}, err
+	}
+	return transaction, nil
+}
+
+func (r *repository) Update(transaction Transactions) (Transactions, error) {
+	err := r.db.Save(&transaction).Error
+	if err != nil {
+		return Transactions{}, err
+	}
+	return transaction, nil
 }

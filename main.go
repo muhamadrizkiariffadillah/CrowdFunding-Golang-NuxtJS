@@ -5,6 +5,7 @@ import (
 
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/authJWT"
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/campaigns"
+	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/payment"
 	"github.com/muhamadrizkiariffadillah/CrowdFunding-Golang-NuxtJS/transaction"
 
 	"github.com/gin-gonic/gin"
@@ -25,6 +26,7 @@ func main() {
 		log.Fatal(err.Error()) // Log and terminate if the database connection fails
 	}
 	authService := authJWT.NewJwtService()
+	paymentService := payment.PaymenService()
 	// Initialize repositories, services, and handlers for user-related operations
 	// Repository layer to interact with database
 	userRepository := users.UserRepository(db)
@@ -44,14 +46,14 @@ func main() {
 
 	// transaction
 	transactionRepository := transaction.TransactionsRepository(db)
-	transactionServices := transaction.TransactionsServices(transactionRepository)
+	transactionServices := transaction.TransactionsServices(transactionRepository, campaignRepository, paymentService)
 	transactionHandler := handler.TransactionsHandler(transactionServices)
 
 	// Setup Gin router and API route groups
 	router := gin.Default()
 	// Static router avatar
 	router.Static("/images/user/avatar", "./images")
-	
+
 	api := router.Group("/api/v1")
 
 	// user url
@@ -78,6 +80,7 @@ func main() {
 	// transaction api
 	api.GET("/campaign/transactions", transactionHandler.GetCampaignTransactions)
 	api.GET("/user/transactions", middleware, transactionHandler.GetUserTransactions)
+	api.POST("/user/transaction", middleware, transactionHandler.CreateTransaction)
 
 	// Swagger API docs route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
